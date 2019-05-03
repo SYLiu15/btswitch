@@ -89,7 +89,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginEnd="30dp"
         android:background="@drawable/outlet_button_off"
-        android:onClick="testButton"
+        android:onClick="sendTestData"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/background" />

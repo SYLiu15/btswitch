@@ -1,19 +1,25 @@
-/*
- * Copyright (C) 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
+/*
+ * Copyright (c) 2015, Nordic Semiconductor
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package com.syl.btswitch;
 
 import android.app.Service;
@@ -30,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.List;
@@ -39,8 +46,8 @@ import java.util.UUID;
  * Service for managing connection and data communication with a GATT server hosted on a
  * given Bluetooth LE device.
  */
-public class BluetoothLeService extends Service {
-    private final static String TAG = BluetoothLeService.class.getSimpleName();
+public class UartService extends Service {
+    private final static String TAG = UartService.class.getSimpleName();
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -53,33 +60,35 @@ public class BluetoothLeService extends Service {
     private static final int STATE_CONNECTED = 2;
 
     public final static String ACTION_GATT_CONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
+            "com.nordicsemi.nrfUART.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
+            "com.nordicsemi.nrfUART.ACTION_GATT_DISCONNECTED";
     public final static String ACTION_GATT_SERVICES_DISCOVERED =
-            "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
+            "com.nordicsemi.nrfUART.ACTION_GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE =
-            "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
+            "com.nordicsemi.nrfUART.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA =
-            "com.example.bluetooth.le.EXTRA_DATA";
-
-    public final static UUID UUID_HEART_RATE_MEASUREMENT =
-            UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
-    //private UUID CLIENT_CHARACTERISTIC_CONFIG = convertFromInteger(0x2902);
-
-    private UUID HEART_RATE_SERVICE = convertFromInteger(0x180D);
-    private UUID HEART_RATE_MEASUREMENT = convertFromInteger(0x2A37);
-
-    private UUID UART_SERVICE = UUID.fromString(SampleGattAttributes.UART_SERVICE);
-    private UUID TX_UART_SERVICE = UUID.fromString(SampleGattAttributes.TX_UART_SERVICE);
-    private UUID RX_UART_SERVICE = UUID.fromString(SampleGattAttributes.RX_UART_SERVICE);
-
+            "com.nordicsemi.nrfUART.EXTRA_DATA";
+    public final static String DEVICE_DOES_NOT_SUPPORT_UART =
+            "com.nordicsemi.nrfUART.DEVICE_DOES_NOT_SUPPORT_UART";
+    
+    public static final UUID TX_POWER_UUID = UUID.fromString("00001804-0000-1000-8000-00805f9b34fb");
+    public static final UUID TX_POWER_LEVEL_UUID = UUID.fromString("00002a07-0000-1000-8000-00805f9b34fb");
+    public static final UUID CCCD = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+    public static final UUID FIRMWARE_REVISON_UUID = UUID.fromString("00002a26-0000-1000-8000-00805f9b34fb");
+    public static final UUID DIS_UUID = UUID.fromString("0000180a-0000-1000-8000-00805f9b34fb");
+    public static final UUID RX_SERVICE_UUID = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
+    public static final UUID RX_CHAR_UUID = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
+    public static final UUID TX_CHAR_UUID = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
+    
+   
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String intentAction;
+            
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 intentAction = ACTION_GATT_CONNECTED;
                 mConnectionState = STATE_CONNECTED;
@@ -100,28 +109,12 @@ public class BluetoothLeService extends Service {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
+            	Log.w(TAG, "mBluetoothGatt = " + mBluetoothGatt );
+            	
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
             }
-
-            /*BluetoothGattCharacteristic characteristic = gatt.getService(UART_SERVICE).getCharacteristic(RX_UART_SERVICE);
-            gatt.setCharacteristicNotification(characteristic, true);
-
-            BluetoothGattDescriptor rxdescriptor = characteristic.getDescriptor(RX_UART_SERVICE);
-            rxdescriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            gatt.writeDescriptor(rxdescriptor);*/
-
-            /*BluetoothGattCharacteristic characteristic = gatt.getService(HEART_RATE_SERVICE).getCharacteristic(HEART_RATE_MEASUREMENT);
-            readCharacteristic(characteristic);
-            setCharacteristicNotification(characteristic,true);*/
-
-            BluetoothGattCharacteristic uartChar = gatt.getService(UART_SERVICE).getCharacteristic(RX_UART_SERVICE);
-            readCharacteristic(uartChar);
-            setCharacteristicNotification(uartChar,true);
-            //gatt.readCharacteristic(characteristic);
-            //gatt.setCharacteristicNotification(characteristic, true);
-
         }
 
         @Override
@@ -129,8 +122,6 @@ public class BluetoothLeService extends Service {
                                          BluetoothGattCharacteristic characteristic,
                                          int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                readCharacteristic(characteristic);
-                setCharacteristicNotification(characteristic, true);
                 broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             }
         }
@@ -138,59 +129,33 @@ public class BluetoothLeService extends Service {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
-            //gatt.readCharacteristic(characteristic);
             broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
         }
     };
 
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
-        sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private void broadcastUpdate(final String action,
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
 
-        // This is special handling for the Heart Rate Measurement profile.  Data parsing is
-        // carried out as per profile specifications:
-        // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
-        if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
-            int flag = characteristic.getProperties();
-            int format = -1;
-            if ((flag & 0x01) != 0) {
-                format = BluetoothGattCharacteristic.FORMAT_UINT16;
-                Log.d(TAG, "Heart rate format UINT16.");
-            } else {
-                format = BluetoothGattCharacteristic.FORMAT_UINT8;
-                Log.d(TAG, "Heart rate format UINT8.");
-            }
-            final int heartRate = characteristic.getIntValue(format, 1);
-            Log.d(TAG, String.format("Received heart rate: %d", heartRate));
-            intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
+        // This is handling for the notification on TX Character of NUS service
+        if (TX_CHAR_UUID.equals(characteristic.getUuid())) {
+        	
+           // Log.d(TAG, String.format("Received TX: %d",characteristic.getValue() ));
+            intent.putExtra(EXTRA_DATA, characteristic.getValue());
         } else {
-            // For all other profiles, writes the data formatted in HEX.
-            final byte[] data = characteristic.getValue();
-            if (data != null && data.length > 0) {
-                StringBuilder newString = new StringBuilder();
-                for (byte aByte : data) {
-                    String byteHex = String.format("%02X", (byte) aByte);
-                    newString.append(byteHex)/*.append(" ")*/;
-
-                }
-                intent.putExtra(EXTRA_DATA, newString.toString().trim());
-                /*final StringBuilder stringBuilder = new StringBuilder(data.length);
-                for(byte byteChar : data)
-                    stringBuilder.append(String.format("%02X ", (byte) byteChar));
-                intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());*/
-            }
+        	
         }
-        sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     public class LocalBinder extends Binder {
-        BluetoothLeService getService() {
-            return BluetoothLeService.this;
+        UartService getService() {
+            return UartService.this;
         }
     }
 
@@ -289,6 +254,7 @@ public class BluetoothLeService extends Service {
             return;
         }
         mBluetoothGatt.disconnect();
+       // mBluetoothGatt.close();
     }
 
     /**
@@ -299,6 +265,8 @@ public class BluetoothLeService extends Service {
         if (mBluetoothGatt == null) {
             return;
         }
+        Log.w(TAG, "mBluetoothGatt closed");
+        mBluetoothDeviceAddress = null;
         mBluetoothGatt.close();
         mBluetoothGatt = null;
     }
@@ -318,52 +286,72 @@ public class BluetoothLeService extends Service {
         mBluetoothGatt.readCharacteristic(characteristic);
     }
 
-    public void writeCharacteristic(BluetoothGattCharacteristic characteristic) {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
-            return;
-        }
-        mBluetoothGatt.writeCharacteristic(characteristic);
-    }
-
     /**
      * Enables or disables notification on a give characteristic.
      *
-     * @param characteristic Characteristic to act on.
-     * @param enabled If true, enable notification.  False otherwise.
+
+    */
+    
+    /**
+     * Enable Notification on TX characteristic
+     *
+     * @return 
      */
-    public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic,
-                                              boolean enabled) {
-        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+    public void enableTXNotification()
+    { 
+    	/*
+    	if (mBluetoothGatt == null) {
+    		showMessage("mBluetoothGatt null" + mBluetoothGatt);
+    		broadcastUpdate(DEVICE_DOES_NOT_SUPPORT_UART);
+    		return;
+    	}
+    		*/
+    	BluetoothGattService RxService = mBluetoothGatt.getService(RX_SERVICE_UUID);
+    	if (RxService == null) {
+            showMessage("Rx service not found!");
+            broadcastUpdate(DEVICE_DOES_NOT_SUPPORT_UART);
             return;
         }
-        mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
-
-        // This is specific to Heart Rate Measurement.
-        if (/*UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())*/true) {
-            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                    UUID.fromString(SampleGattAttributes.CLIENT_CHARACTERISTIC_CONFIG));
-            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            mBluetoothGatt.writeDescriptor(descriptor);
+    	BluetoothGattCharacteristic TxChar = RxService.getCharacteristic(TX_CHAR_UUID);
+        if (TxChar == null) {
+            showMessage("Tx charateristic not found!");
+            broadcastUpdate(DEVICE_DOES_NOT_SUPPORT_UART);
+            return;
         }
+        mBluetoothGatt.setCharacteristicNotification(TxChar,true);
+        
+        BluetoothGattDescriptor descriptor = TxChar.getDescriptor(CCCD);
+        descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        mBluetoothGatt.writeDescriptor(descriptor);
+    	
     }
-
-    public void writeTXCharacteristic(byte[] value) {
-        BluetoothGattService TXService = mBluetoothGatt.getService(TX_UART_SERVICE);
-        if (TXService == null) {
-            //broadcastUpdate(UART_NOT_SUPPORTED);
+    
+    public void writeRXCharacteristic(byte[] value)
+    {
+    
+    	
+    	BluetoothGattService RxService = mBluetoothGatt.getService(RX_SERVICE_UUID);
+    	showMessage("mBluetoothGatt null"+ mBluetoothGatt);
+    	if (RxService == null) {
+            showMessage("Rx service not found!");
+            broadcastUpdate(DEVICE_DOES_NOT_SUPPORT_UART);
             return;
         }
-        BluetoothGattCharacteristic TXChar = TXService.getCharacteristic(TX_UART_SERVICE);
-        if (TXChar == null) {
-            //broadcastUpdate(UART_NOT_SUPPORTED);
+    	BluetoothGattCharacteristic RxChar = RxService.getCharacteristic(RX_CHAR_UUID);
+        if (RxChar == null) {
+            showMessage("Rx charateristic not found!");
+            broadcastUpdate(DEVICE_DOES_NOT_SUPPORT_UART);
             return;
         }
-        TXChar.setValue(value);
-        mBluetoothGatt.writeCharacteristic(TXChar);
+        RxChar.setValue(value);
+    	boolean status = mBluetoothGatt.writeCharacteristic(RxChar);
+    	
+        Log.d(TAG, "write TXchar - status=" + status);  
     }
-
+    
+    private void showMessage(String msg) {
+        Log.e(TAG, msg);
+    }
     /**
      * Retrieves a list of supported GATT services on the connected device. This should be
      * invoked only after {@code BluetoothGatt#discoverServices()} completes successfully.
@@ -374,12 +362,5 @@ public class BluetoothLeService extends Service {
         if (mBluetoothGatt == null) return null;
 
         return mBluetoothGatt.getServices();
-    }
-
-    public UUID convertFromInteger(int i) {
-        final long MSB = 0x0000000000001000L;
-        final long LSB = 0x800000805f9b34fbL;
-        long value = i & 0xFFFFFFFF;
-        return new UUID(MSB | (value << 32), LSB);
     }
 }

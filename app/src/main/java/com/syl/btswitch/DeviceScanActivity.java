@@ -1,4 +1,11 @@
 /*
+ * File Name: DeviceScanActivity.java
+ * Editor: Suyang Liu
+ * Notes: Sourced from the Android Open Source Project. Modified by Suyang Liu.
+ * Date: May 2019
+ */
+
+/*
  * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,14 +33,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.constraint.ConstraintLayout;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,14 +56,11 @@ public class DeviceScanActivity extends ListActivity {
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 10000;
 
-    //PopupWindow myPopup;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bt_popup);
-        //getActionBar().setTitle(R.string.device_list);
         mHandler = new Handler();
 
         // Use this check to determine whether BLE is supported on the device.  Then you can
@@ -79,27 +80,7 @@ public class DeviceScanActivity extends ListActivity {
         if (mBluetoothAdapter == null) {
             Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
             finish();
-            return;
         }
-
-        /*LayoutInflater myLayout = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View myView = myLayout.inflate(R.layout.bt_popup,null);
-        myPopup = new PopupWindow(myView,ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT,true);
-        myPopup.setAnimationStyle(android.R.style.Animation_Dialog);
-        myPopup.showAtLocation(myView, Gravity.CENTER,0,0);*/
-/*
-        //set button behavior
-        if (!mScanning) {
-            View scanButton = findViewById(R.id.btscan);
-            scanButton.setVisibility(View.VISIBLE);
-            View stopButton = findViewById(R.id.btstop);
-            stopButton.setVisibility(View.GONE);
-        } else {
-            View scanButton = findViewById(R.id.btscan);
-            scanButton.setVisibility(View.GONE);
-            View stopButton = findViewById(R.id.btstop);
-            scanButton.setVisibility(View.VISIBLE);
-        }*/
     }
 
     public void menuCancel(View view) {
@@ -115,36 +96,6 @@ public class DeviceScanActivity extends ListActivity {
     public void stopScan(View view) {
         scanLeDevice(false);
     }
-
-/*    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        if (!mScanning) {
-            menu.findItem(R.id.menu_stop).setVisible(false);
-            menu.findItem(R.id.menu_scan).setVisible(true);
-            menu.findItem(R.id.menu_refresh).setActionView(null);
-        } else {
-            menu.findItem(R.id.menu_stop).setVisible(true);
-            menu.findItem(R.id.menu_scan).setVisible(false);
-            menu.findItem(R.id.menu_refresh).setActionView(
-                    R.layout.actionbar_indeterminate_progress);
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_scan:
-                mLeDeviceListAdapter.clear();
-                scanLeDevice(true);
-                break;
-            case R.id.menu_stop:
-                scanLeDevice(false);
-                break;
-        }
-        return true;
-    }*/
 
     @Override
     protected void onResume() {
@@ -164,16 +115,6 @@ public class DeviceScanActivity extends ListActivity {
         setListAdapter(mLeDeviceListAdapter);
         scanLeDevice(true);
     }
-
-    /*@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // User chose not to enable Bluetooth.
-        if (requestCode == REQUEST_ENABLE_BT && resultCode == Activity.RESULT_CANCELED) {
-            finish();
-            return;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }*/
 
     @Override
     protected void onPause() {
@@ -197,7 +138,6 @@ public class DeviceScanActivity extends ListActivity {
             mScanning = false;
         }
         finish();
-        //startActivity(intent);
     }
 
     private void scanLeDevice(final boolean enable) {
@@ -218,7 +158,6 @@ public class DeviceScanActivity extends ListActivity {
             mScanning = false;
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
         }
-        //invalidateOptionsMenu();
     }
 
     // Adapter for holding devices found through scanning.

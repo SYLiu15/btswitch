@@ -46,6 +46,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,6 +81,12 @@ public class MainActivity extends AppCompatActivity {
     private String mData2 = null;
     private String mFeatherData = null;
     private String mControlData = "1193046";
+
+    private boolean mOutlet1State = false;
+    private boolean mOutlet2State = false;
+    private Button mOutlet1;
+    private Button mOutlet2;
+    private ImageView mStatusIndicator;
 
     // Code to manage Service lifecycle.
     private ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -115,9 +123,8 @@ public class MainActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     public void run() {
                         mState = UART_PROFILE_DISCONNECTED;
-                        updateDeviceText();
                         mService.close();
-
+                        updateDeviceText();
                     }
                 });
             }
@@ -173,7 +180,11 @@ public class MainActivity extends AppCompatActivity {
 
         mDeviceTitle = findViewById(R.id.deviceLabelText);
         mConnectionState = findViewById(R.id.deviceStatusText);
-        mDataField = findViewById(R.id.test_textview);
+        //mDataField = findViewById(R.id.test_textview);
+        mOutlet1 = findViewById(R.id.outlet1);
+        mOutlet2 = findViewById(R.id.outlet2);
+        mStatusIndicator = findViewById((R.id.statusIndicator));
+
 
         mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBtAdapter == null) {
@@ -304,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
             }*/
             mFeatherData = mData2;
 
-            mDataField.setText(mFeatherData);
+            //mDataField.setText(mFeatherData);
         }
     }
 
@@ -317,8 +328,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (mState == UART_PROFILE_CONNECTED) {
             mConnectionState.setText(R.string.connected);
+            mStatusIndicator.setImageResource(R.drawable.on);
         } else {
             mConnectionState.setText(R.string.disconnected);
+            mStatusIndicator.setImageResource(R.drawable.off);
         }
     }
 
@@ -349,7 +362,7 @@ public class MainActivity extends AppCompatActivity {
         }
         String newString = new String(hexChars);
 
-        StringBuilder returnString = new StringBuilder();
+        /*StringBuilder returnString = new StringBuilder();
         for (int i = 0; i < newString.length(); i+=2) {
             String temp = newString.substring(i, i+2);
 
@@ -363,6 +376,49 @@ public class MainActivity extends AppCompatActivity {
                 returnString.append((char) someInt);
             }
         }
-        return returnString.toString();
+        return returnString.toString();*/
+        return newString;
+    }
+
+    public void outletButton (View view) {
+        switch (view.getId()) {
+            case R.id.outlet1:
+                if (mOutlet1State) {
+                    mOutlet1State = false;
+                } else {
+                    mOutlet1State = true;
+                }
+
+                //do stuff
+                toggleButton(1);
+                break;
+
+            case R.id.outlet2:
+                if (mOutlet2State) {
+                    mOutlet2State = false;
+                } else {
+                    mOutlet2State = true;
+                }
+
+                //do stuff
+                toggleButton(2);
+                break;
+        }
+    }
+
+    public void toggleButton(int value) {
+        if (value == 1) {
+            if (mOutlet1State) {
+                mOutlet1.setBackgroundResource(R.drawable.outlet_button_on);
+            } else {
+                mOutlet1.setBackgroundResource(R.drawable.outlet_button_off);
+            }
+        } else {
+            if (mOutlet2State) {
+                mOutlet2.setBackgroundResource(R.drawable.outlet_button_on);
+            } else {
+                mOutlet2.setBackgroundResource(R.drawable.outlet_button_off);
+            }
+        }
     }
 }

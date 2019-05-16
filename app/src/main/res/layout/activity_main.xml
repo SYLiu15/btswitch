@@ -7,7 +7,325 @@
     android:background="@color/colorBackground"
     tools:context=".MainActivity">
 
+    <!-- 1st button info -->
+    <Button
+        android:id="@+id/outlet1"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/outlet_button_off"
+        android:onClick="outletButton"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:stateListAnimator="@null"
+        app:layout_constraintEnd_toStartOf="@+id/o1Label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btBackground" />
+
+    <TextView
+        android:id="@+id/o1Label"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="60dp"
+        android:gravity="start|bottom"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/left_outlet"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/o1Status"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/outlet1"
+        app:layout_constraintTop_toTopOf="@+id/outlet1" />
+
+    <TextView
+        android:id="@+id/o1Status"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="start|top"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/off"
+        android:textColor="@color/red"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/outlet1"
+        app:layout_constraintEnd_toEndOf="@+id/o1Label"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/o1Label"
+        app:layout_constraintTop_toBottomOf="@+id/o1Label" />
+
+    <View
+        android:id="@+id/o1background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/rounded_background"
+        app:layout_constraintBottom_toBottomOf="@+id/o1Timer"
+        app:layout_constraintEnd_toEndOf="@id/o1TimerText"
+        app:layout_constraintStart_toStartOf="@id/o1Current"
+        app:layout_constraintTop_toTopOf="@id/o1Current" />
+
+    <TextView
+        android:id="@+id/o1Current"
+        android:layout_width="70dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="15dp"
+        android:gravity="end|center_vertical"
+        android:text="@string/current_label"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/o1CurrentText"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="@+id/outlet1"
+        app:layout_constraintTop_toBottomOf="@id/outlet1" />
+
+    <TextView
+        android:id="@+id/o1CurrentText"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:gravity="start|center_vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/off"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/o1Label"
+        app:layout_constraintStart_toEndOf="@+id/o1Current"
+        app:layout_constraintTop_toTopOf="@+id/o1Current" />
+
+    <TextView
+        android:id="@+id/o1Timer"
+        android:layout_width="70dp"
+        android:layout_height="30dp"
+        android:gravity="end|center_vertical"
+        android:text="@string/timer_label"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/o1Current"
+        app:layout_constraintTop_toBottomOf="@+id/o1Current" />
+
+    <TextView
+        android:id="@+id/o1TimerText"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:gravity="start|center_vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/disabled"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/o1CurrentText"
+        app:layout_constraintStart_toEndOf="@+id/o1Timer"
+        app:layout_constraintTop_toTopOf="@+id/o1Timer" />
+
+    <Button
+        android:id="@+id/o1TimerSet"
+        android:layout_width="44dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:onClick="timerSet"
+        android:stateListAnimator="@null"
+        app:layout_constraintBottom_toBottomOf="@+id/o1Timer"
+        app:layout_constraintEnd_toEndOf="@+id/o1TimerText"
+        app:layout_constraintTop_toTopOf="@+id/o1Current" />
+
+    <ImageView
+        android:id="@+id/o1TimerIcon"
+        android:layout_width="24dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="18dp"
+        android:contentDescription="@string/settings"
+        app:layout_constraintBottom_toBottomOf="@+id/o1Timer"
+        app:layout_constraintEnd_toEndOf="@+id/o1TimerText"
+        app:layout_constraintTop_toTopOf="@+id/o1Current"
+        app:srcCompat="@drawable/settings_icon" />
+
+
+    <!-- 2nd button info -->
+    <Button
+        android:id="@+id/outlet2"
+        android:layout_width="130dp"
+        android:layout_height="130dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/outlet_button_off"
+        android:onClick="outletButton"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:stateListAnimator="@null"
+        app:layout_constraintEnd_toStartOf="@+id/o2Label"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/o1Timer" />
+
+    <TextView
+        android:id="@+id/o2Label"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="60dp"
+        android:gravity="start|bottom"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/right_outlet"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/o2Status"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/outlet2"
+        app:layout_constraintTop_toTopOf="@+id/outlet2" />
+
+    <TextView
+        android:id="@+id/o2Status"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:gravity="start|top"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/off"
+        android:textColor="@color/red"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/outlet2"
+        app:layout_constraintEnd_toEndOf="@+id/o2Label"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/o2Label"
+        app:layout_constraintTop_toBottomOf="@+id/o2Label" />
+
+    <View
+        android:id="@+id/o2background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/rounded_background"
+        app:layout_constraintBottom_toBottomOf="@+id/o2Timer"
+        app:layout_constraintEnd_toEndOf="@id/o2TimerText"
+        app:layout_constraintStart_toStartOf="@id/o2Current"
+        app:layout_constraintTop_toTopOf="@id/o2Current" />
+
+    <TextView
+        android:id="@+id/o2Current"
+        android:layout_width="70dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="15dp"
+        android:gravity="end|center_vertical"
+        android:text="@string/current_label"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/o2CurrentText"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="@+id/outlet2"
+        app:layout_constraintTop_toBottomOf="@id/outlet2" />
+
+    <TextView
+        android:id="@+id/o2CurrentText"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:gravity="start|center_vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/off"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/o2Label"
+        app:layout_constraintStart_toEndOf="@+id/o2Current"
+        app:layout_constraintTop_toTopOf="@+id/o2Current" />
+
+    <TextView
+        android:id="@+id/o2Timer"
+        android:layout_width="70dp"
+        android:layout_height="30dp"
+        android:gravity="end|center_vertical"
+        android:text="@string/timer_label"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/o2Current"
+        app:layout_constraintTop_toBottomOf="@+id/o2Current" />
+
+    <TextView
+        android:id="@+id/o2TimerText"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:gravity="start|center_vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/disabled"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/o2CurrentText"
+        app:layout_constraintStart_toEndOf="@+id/o2Timer"
+        app:layout_constraintTop_toTopOf="@+id/o2Timer" />
+
+    <Button
+        android:id="@+id/o2TimerSet"
+        android:layout_width="44dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:onClick="timerSet"
+        android:stateListAnimator="@null"
+        app:layout_constraintBottom_toBottomOf="@+id/o2Timer"
+        app:layout_constraintEnd_toEndOf="@+id/o2TimerText"
+        app:layout_constraintTop_toTopOf="@+id/o2Current" />
+
+    <ImageView
+        android:id="@+id/o2TimerIcon"
+        android:layout_width="24dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="18dp"
+        android:contentDescription="@string/settings"
+        app:layout_constraintBottom_toBottomOf="@+id/o2Timer"
+        app:layout_constraintEnd_toEndOf="@+id/o2TimerText"
+        app:layout_constraintTop_toTopOf="@+id/o2Current"
+        app:srcCompat="@drawable/settings_icon" />
+
+    <!-- UI Hide -->
+    <View
+        android:id="@+id/uiHide"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.85"
+        android:background="@color/colorBackground" />
+
+    <TextView
+        android:id="@+id/uiHideText"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:background="@drawable/gradient_rectangle"
+        android:gravity="center"
+        android:text="@string/tap_to_select"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btbutton" />
+
+
     <!-- Device info -->
+    <ImageView
+        android:id="@+id/arrow"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="2dp"
+        android:contentDescription="@string/arrow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btBackground"
+        app:srcCompat="@drawable/arrow" />
+
+    <TextView
+        android:id="@+id/appTitle"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:gravity="start|center_vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:text="@string/app_name"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <View
         android:id="@+id/btBackground"
         android:layout_width="0dp"
@@ -23,15 +341,16 @@
         android:layout_width="70dp"
         android:layout_height="30dp"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
         android:gravity="end|center_vertical"
         android:text="@string/device_name"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/deviceLabelText"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/appTitle" />
 
     <TextView
         android:id="@+id/deviceLabelText"
@@ -55,6 +374,7 @@
         android:gravity="end|center_vertical"
         android:text="@string/device_status"
         android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/deviceLabel" />
 
@@ -71,6 +391,17 @@
         app:layout_constraintStart_toEndOf="@+id/deviceStatus"
         app:layout_constraintTop_toTopOf="@+id/deviceStatus" />
 
+    <Button
+        android:id="@+id/btbutton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:onClick="showBtMenu"
+        app:layout_constraintBottom_toBottomOf="@+id/btBackground"
+        app:layout_constraintEnd_toEndOf="@+id/btBackground"
+        app:layout_constraintStart_toStartOf="@+id/btBackground"
+        app:layout_constraintTop_toTopOf="@+id/btBackground" />
+
     <ImageView
         android:id="@+id/statusIndicator"
         android:layout_width="56dp"
@@ -83,223 +414,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/btBackground"
         app:srcCompat="@drawable/off" />
-
-    <Button
-        android:id="@+id/btbutton"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@android:color/transparent"
-        android:onClick="showBtMenu"
-        app:layout_constraintBottom_toBottomOf="@+id/btBackground"
-        app:layout_constraintEnd_toEndOf="@+id/btBackground"
-        app:layout_constraintStart_toStartOf="@+id/btBackground"
-        app:layout_constraintTop_toTopOf="@+id/btBackground" />
-
-    <!-- 1st button info -->
-
-    <Button
-        android:id="@+id/outlet1"
-        android:layout_width="160dp"
-        android:layout_height="126dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="30dp"
-        android:background="@drawable/outlet_button_off"
-        android:onClick="outletButton"
-        android:text="@string/value_1"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btBackground" />
-
-    <View
-        android:id="@+id/o1background"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@drawable/rounded_background"
-        app:layout_constraintBottom_toBottomOf="@+id/o1Timer"
-        app:layout_constraintEnd_toEndOf="@id/o1TimerText"
-        app:layout_constraintStart_toStartOf="@id/o1Current"
-        app:layout_constraintTop_toTopOf="@id/o1Current" />
-
-    <TextView
-        android:id="@+id/o1Current"
-        android:layout_width="70dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="70dp"
-        android:layout_marginTop="15dp"
-        android:gravity="end|center_vertical"
-        android:text="@string/current_label"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toStartOf="@+id/o1CurrentText"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/outlet1" />
-
-    <TextView
-        android:id="@+id/o1CurrentText"
-        android:layout_width="0dp"
-        android:layout_height="30dp"
-        android:layout_marginEnd="70dp"
-        android:gravity="start|center_vertical"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:text="@string/off"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/o1Current"
-        app:layout_constraintTop_toTopOf="@+id/o1Current" />
-
-    <TextView
-        android:id="@+id/o1Timer"
-        android:layout_width="70dp"
-        android:layout_height="30dp"
-        android:gravity="end|center_vertical"
-        android:text="@string/timer_label"
-        android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="@+id/o1Current"
-        app:layout_constraintTop_toBottomOf="@+id/o1Current" />
-
-    <TextView
-        android:id="@+id/o1TimerText"
-        android:layout_width="0dp"
-        android:layout_height="30dp"
-        android:gravity="start|center_vertical"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:text="@string/disabled"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@+id/o1CurrentText"
-        app:layout_constraintStart_toEndOf="@+id/o1Timer"
-        app:layout_constraintTop_toTopOf="@+id/o1Timer" />
-
-    <Button
-        android:id="@+id/o1TimerSet"
-        android:layout_width="44dp"
-        android:layout_height="0dp"
-        android:background="@android:color/transparent"
-        android:onClick="testButton"
-        app:layout_constraintBottom_toBottomOf="@+id/o1Timer"
-        app:layout_constraintEnd_toEndOf="@+id/o1TimerText"
-        app:layout_constraintTop_toTopOf="@+id/o1Current" />
-
-    <ImageView
-        android:id="@+id/o1TimerIcon"
-        android:layout_width="24dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="18dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="18dp"
-        android:contentDescription="@string/settings"
-        app:layout_constraintBottom_toBottomOf="@+id/o1Timer"
-        app:layout_constraintEnd_toEndOf="@+id/o1TimerText"
-        app:layout_constraintTop_toTopOf="@+id/o1Current"
-        app:srcCompat="@drawable/settings_icon" />
-
-
-    <!-- 2nd button info -->
-    <Button
-        android:id="@+id/outlet2"
-        android:layout_width="160dp"
-        android:layout_height="126dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="30dp"
-        android:background="@drawable/outlet_button_off"
-        android:onClick="outletButton"
-        android:text="@string/value_2"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/o1Timer" />
-
-    <View
-        android:id="@+id/o2background"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@drawable/rounded_background"
-        app:layout_constraintBottom_toBottomOf="@+id/o2Timer"
-        app:layout_constraintEnd_toEndOf="@id/o2TimerText"
-        app:layout_constraintStart_toStartOf="@id/o2Current"
-        app:layout_constraintTop_toTopOf="@id/o2Current" />
-
-    <TextView
-        android:id="@+id/o2Current"
-        android:layout_width="70dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="70dp"
-        android:layout_marginTop="15dp"
-        android:gravity="end|center_vertical"
-        android:text="@string/current_label"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toStartOf="@+id/o2CurrentText"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/outlet2" />
-
-    <TextView
-        android:id="@+id/o2CurrentText"
-        android:layout_width="0dp"
-        android:layout_height="30dp"
-        android:layout_marginEnd="70dp"
-        android:gravity="start|center_vertical"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:text="@string/off"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/o2Current"
-        app:layout_constraintTop_toTopOf="@+id/o2Current" />
-
-    <TextView
-        android:id="@+id/o2Timer"
-        android:layout_width="70dp"
-        android:layout_height="30dp"
-        android:gravity="end|center_vertical"
-        android:text="@string/timer_label"
-        android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="@+id/o2Current"
-        app:layout_constraintTop_toBottomOf="@+id/o2Current" />
-
-    <TextView
-        android:id="@+id/o2TimerText"
-        android:layout_width="0dp"
-        android:layout_height="30dp"
-        android:gravity="start|center_vertical"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:text="@string/disabled"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@+id/o2CurrentText"
-        app:layout_constraintStart_toEndOf="@+id/o2Timer"
-        app:layout_constraintTop_toTopOf="@+id/o2Timer" />
-
-    <Button
-        android:id="@+id/o2TimerSet"
-        android:layout_width="44dp"
-        android:layout_height="0dp"
-        android:background="@android:color/transparent"
-        android:onClick="testButton"
-        app:layout_constraintBottom_toBottomOf="@+id/o2Timer"
-        app:layout_constraintEnd_toEndOf="@+id/o2TimerText"
-        app:layout_constraintTop_toTopOf="@+id/o2Current" />
-
-    <ImageView
-        android:id="@+id/o2TimerIcon"
-        android:layout_width="24dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="18dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="18dp"
-        android:contentDescription="@string/settings"
-        app:layout_constraintBottom_toBottomOf="@+id/o2Timer"
-        app:layout_constraintEnd_toEndOf="@+id/o2TimerText"
-        app:layout_constraintTop_toTopOf="@+id/o2Current"
-        app:srcCompat="@drawable/settings_icon" />
 
 </android.support.constraint.ConstraintLayout>

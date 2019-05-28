@@ -3,9 +3,6 @@
  * Editor: Suyang Liu
  * Notes: Certain functions sourced from Nordic Semiconductor example code.
  * Date: May 2019
- *
- * Description:
- *
  */
 
 /*
@@ -45,7 +42,8 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.os.IBinder;
-import android.support.v4.app.DialogFragment;
+import android.support.constraint.Group;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -56,25 +54,17 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-
-import java.nio.charset.Charset;
-
 import static android.view.View.GONE;
-import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TimePickerFragment.OnCompleteListener {
     private final static String TAG = MainActivity.class.getSimpleName();
 
     private static final int REQUEST_SELECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
-    //private static final int UART_PROFILE_READY = 10;
-    //public static final String TAG = "nRFUART";
     private static final int UART_PROFILE_CONNECTED = 20;
     private static final int UART_PROFILE_DISCONNECTED = 21;
-    //private static final int STATE_OFF = 10;
 
     private int mState = UART_PROFILE_DISCONNECTED;
 
@@ -95,23 +85,21 @@ public class MainActivity extends AppCompatActivity {
     //sent data packets
     private String mPowerLData = "2150004C42";
     private String mPowerRData = "215000523C";
-    private String mTimerLData = "2154004C0000";
-    private String mTimerRData = "215400520000";
+    private String mTimer1Data = "2154004C";
+    private String mTimer2Data = "21540052";
 
     //status values
     private boolean mOutlet1State = false;
     private boolean mOutlet2State = false;
     private boolean mTimer1State = false;
-    private int mTimer1hour = 0;
-    private int mTimer1min = 0;
+    private int mTimer1hour = 1;
+    private int mTimer1min = 2;
     private boolean mTimer2State = false;
-    private int mTimer2hour = 0;
-    private int mTimer2min = 0;
+    private int mTimer2hour = 3;
+    private int mTimer2min = 4;
 
     //UI elements
-    private View mHide;
-    private ImageView mArrow;
-    private TextView mUIHideText;
+    private Group mHideGroup;
     private TextView mO1Status;
     private TextView mO2Status;
     private TextView mCurrent1;
@@ -119,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView mTimer1;
     private TextView mTimer2;
     private ImageView mStatusIndicator;
+
+    //private TextView mTest;
 
     private Button mOutlet1;
     private Button mOutlet2;
@@ -218,9 +208,7 @@ public class MainActivity extends AppCompatActivity {
         mTimer2 = findViewById(R.id.o2TimerText);
         mStatusIndicator = findViewById((R.id.statusIndicator));
 
-        mHide = findViewById(R.id.uiHide);
-        mUIHideText = findViewById(R.id.uiHideText);
-        mArrow = findViewById(R.id.arrow);
+        mHideGroup = findViewById(R.id.hideGroup);
 
         mOutlet1 = findViewById(R.id.outlet1);
         mOutlet2 = findViewById(R.id.outlet2);
@@ -290,6 +278,16 @@ public class MainActivity extends AppCompatActivity {
         mService= null;
     }
 
+    private static IntentFilter makeGattUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(UartService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(UartService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(UartService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(UartService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(UartService.DEVICE_DOES_NOT_SUPPORT_UART);
+        return intentFilter;
+    }
+
     public void testButton(View view) {
         Toast myToast = Toast.makeText(this, String.valueOf(R.string.device_name), Toast.LENGTH_SHORT);
         myToast.setGravity(Gravity.CENTER,0,0);
@@ -309,14 +307,16 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     mService.disconnect();
-                    //mDevice = null;
                     mDeviceName = null;
                     mState = UART_PROFILE_DISCONNECTED;
 
                     mOutlet1State = false;
                     mOutlet2State = false;
+                    mTimer1State = false;
+                    mTimer2State = false;
                     toggleButton(1);
                     toggleButton(2);
+                    displayData();
                     updateDeviceText();
                 }
             });
@@ -368,37 +368,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void updateData(String data) {
-        if (mData1 == null) {
-            mData1 = data;
-        } else {
-            mFeatherData = mData1;
-            mFeatherData += data;
-            mData1 = null;
-
-            //overcurrent check
-
-            //update outlets
-            if (mFeatherData.charAt(7) == '1' && !mOutlet1State) {
-                mOutlet1State = true;
-                toggleButton(1);
-            } else if (mFeatherData.charAt(7) == '0' && mOutlet1State) {
-                mOutlet1State = false;
-                toggleButton(1);
-            }
-
-            if (mFeatherData.charAt(23) == '1' && !mOutlet2State) {
-                mOutlet2State = true;
-                toggleButton(2);
-            } else if (mFeatherData.charAt(23) == '0' && mOutlet2State) {
-                mOutlet2State = false;
-                toggleButton(2);
-            }
-
-            //update timers
-        }
-    }
-
     private void updateDeviceText() {
         if (mDeviceName != null) {
             mDeviceTitle.setText(mDeviceName);
@@ -409,9 +378,7 @@ public class MainActivity extends AppCompatActivity {
         if (mState == UART_PROFILE_CONNECTED) {
             mConnectionState.setText(R.string.connected);
             mStatusIndicator.setImageResource(R.drawable.on);
-            mHide.setVisibility(GONE);
-            mUIHideText.setVisibility(GONE);
-            mArrow.setVisibility(GONE);
+            mHideGroup.setVisibility(GONE);
             mOutlet1.setClickable(true);
             mOutlet2.setClickable(true);
             mTimer1Button.setClickable(true);
@@ -420,9 +387,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             mConnectionState.setText(R.string.disconnected);
             mStatusIndicator.setImageResource(R.drawable.off);
-            mHide.setVisibility(VISIBLE);
-            mUIHideText.setVisibility(VISIBLE);
-            mArrow.setVisibility(VISIBLE);
+            mHideGroup.setVisibility(VISIBLE);
             mOutlet1.setClickable(false);
             mOutlet2.setClickable(false);
             mTimer1Button.setClickable(false);
@@ -430,22 +395,286 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void updateData(String data) {
+        if (mData1 == null) {
+            mData1 = data;
+        } else {
+            mFeatherData = mData1;
+            mFeatherData += data;
+            mData1 = null;
+
+            //packet check
+            if (getStringFromByte(0).equals("21") && getStringFromByte(1).equals("53")) {
+                //overcurrent check
+                if (getStringFromByte(18).equals("01")) {
+                    AlertDialog.Builder aDialog = new AlertDialog.Builder(this);
+                    aDialog.setTitle("Over-current Warning!");
+                    String myString = "Device experienced current draw exceeding safe values. Resetting outlets.";
+                    aDialog.setMessage(myString);
+                    aDialog.show();
+                    return;
+                }
+
+                //update outlets
+                //left on/off
+                if (getStringFromByte(3).equals("01") && !mOutlet1State) {
+                    mOutlet1State = true;
+                    toggleButton(1);
+                } else if (getStringFromByte(3).equals("00") && mOutlet1State) {
+                    mOutlet1State = false;
+                    toggleButton(1);
+                }
+
+                //right on/off
+                if (getStringFromByte(11).equals("01") && !mOutlet2State) {
+                    mOutlet2State = true;
+                    toggleButton(2);
+                } else if (getStringFromByte(11).equals("00") && mOutlet2State) {
+                    mOutlet2State = false;
+                    toggleButton(2);
+                }
+
+                //update timers
+                //left on/off
+                if (getStringFromByte(6).equals("01") && !mTimer1State) {
+                    mTimer1State = true;
+                } else if (getStringFromByte(6).equals("00") && mTimer1State) {
+                    mTimer1State = false;
+                }
+
+                //right on/off
+                if (getStringFromByte(14).equals("01") && !mTimer2State) {
+                    mTimer2State = true;
+                } else if (getStringFromByte(14).equals("00") && mTimer2State) {
+                    mTimer2State = false;
+                }
+
+                //display data
+                displayData();
+            }
+        }
+    }
+
+    private void displayData() {
+        //outlet 1
+        //print current
+        if (mOutlet1State) {
+            //print value
+            mCurrent1.setText(returnCurrent(4));
+        } else {
+            mCurrent1.setText(R.string.off);
+        }
+        //print timer data
+        if (mTimer1State) {
+            //print time remaining
+            mTimer1.setText(returnControllerTime(7));
+        } else {
+            mTimer1.setText(R.string.disabled);
+        }
+
+        //outlet 2
+        //print current
+        if (mOutlet2State) {
+            //print value
+            mCurrent2.setText(returnCurrent(12));
+        } else {
+            mCurrent2.setText(R.string.off);
+        }
+        //print timer data
+        if (mTimer2State) {
+            //print time remaining
+            mTimer2.setText(returnControllerTime(15));
+        } else {
+            mTimer2.setText(R.string.disabled);
+        }
+    }
+
+    private String returnCurrent (int index) {
+        String myString = "";
+        myString += mFeatherData.charAt(index*2);
+        myString += mFeatherData.charAt(index*2+1);
+        myString += mFeatherData.charAt(index*2+2);
+        myString += mFeatherData.charAt(index*2+3);
+
+        int myInt = Integer.parseInt(myString,16);
+        float someFloat = (float)myInt/1000;
+        String returnString = Float.toString(someFloat);
+        returnString += " A";
+        return returnString;
+    }
+
+    private String returnControllerTime(int index) {
+        String tempString = "";
+        tempString += mFeatherData.charAt(index*2);
+        tempString += mFeatherData.charAt(index*2+1);
+        tempString += mFeatherData.charAt(index*2+2);
+        tempString += mFeatherData.charAt(index*2+3);
+        int seconds = Integer.parseInt(tempString,16);
+
+        String returnString = "";
+        int hourRem = seconds/3600;
+        int minRem = (seconds%3600)/60;
+        int secRem = ((seconds%3600)%60);
+        if (hourRem != 0) {
+            returnString += hourRem;
+            returnString += "h ";
+        }
+        if (minRem != 0) {
+            returnString += minRem;
+            returnString += "m ";
+        }
+        returnString += secRem;
+        returnString += "s";
+
+        return returnString;
+    }
+
+    public void outletButton (View view) {
+        if (mState == UART_PROFILE_CONNECTED) {
+            switch (view.getId()) {
+                case R.id.outlet1:
+                    sendData(mPowerLData);
+                    break;
+
+                case R.id.outlet2:
+                    sendData(mPowerRData);
+                    break;
+            }
+        } else {
+            Toast myToast = Toast.makeText(this, String.valueOf(R.string.data_send_error), Toast.LENGTH_SHORT);
+            myToast.setGravity(Gravity.CENTER,0,0);
+            myToast.show();
+        }
+    }
+
+    public void toggleButton(int value) {
+        if (value == 1) {
+            if (mOutlet1State) {
+                mOutlet1.setBackgroundResource(R.drawable.outlet_button_on);
+                mO1Status.setText(R.string.on);
+                mO1Status.setTextColor(ContextCompat.getColor(this, R.color.green));
+            } else {
+                mOutlet1.setBackgroundResource(R.drawable.outlet_button_off);
+                mO1Status.setText(R.string.off);
+                mO1Status.setTextColor(ContextCompat.getColor(this, R.color.red));
+            }
+
+        } else {
+            if (mOutlet2State) {
+                mOutlet2.setBackgroundResource(R.drawable.outlet_button_on);
+                mO2Status.setText(R.string.on);
+                mO2Status.setTextColor(ContextCompat.getColor(this, R.color.green));
+            } else {
+                mOutlet2.setBackgroundResource(R.drawable.outlet_button_off);
+                mO2Status.setText(R.string.off);
+                mO2Status.setTextColor(ContextCompat.getColor(this, R.color.red));
+            }
+        }
+    }
+
+    public void timerSet(View view) {
+        if (mState == UART_PROFILE_CONNECTED) {
+            TimePickerFragment newFragment;
+            switch (view.getId()) {
+                case R.id.o1TimerSet:
+                    newFragment = TimePickerFragment.newInstance(mTimer1State, mTimer1hour, mTimer1min, 1);
+                    newFragment.show(getSupportFragmentManager(),"TimePicker");
+                    break;
+
+                case R.id.o2TimerSet:
+                    newFragment = TimePickerFragment.newInstance(mTimer2State, mTimer2hour, mTimer2min, 2);
+                    newFragment.show(getSupportFragmentManager(),"TimePicker");
+                    break;
+            }
+        } else {
+            //device error toast
+        }
+
+    }
+
+    @Override
+    public void returnData(boolean enable, int hour, int min, int index) {
+        // Use the returned value
+        switch (index) {
+            case 1:
+                mTimer1State = enable;
+                mTimer1hour = hour;
+                mTimer1min = min;
+
+                //send data
+                sendTimeData(1);
+                break;
+            case 2:
+                mTimer2State = enable;
+                mTimer2hour = hour;
+                mTimer2min = min;
+
+                //send data
+                sendTimeData(2);
+                break;
+        }
+    }
+
+    private void sendTimeData(int index) {
+        String returnString = "";
+        switch (index) {
+            case 1:
+                returnString += mTimer1Data;
+
+                if (mTimer1State) {
+                    returnString += "53";
+
+                    int seconds = mTimer1hour*3600 + mTimer1min*60;
+                    String secondString = Integer.toHexString(seconds).toUpperCase();
+
+                    for (int i = 0; i < 4 - secondString.length(); i++) {
+                        returnString += "0";
+                    }
+                    returnString += secondString;
+                } else {
+                    returnString += "43";
+                    returnString += "0000";
+                }
+
+                returnString += calcChecksum(returnString);
+                sendData(returnString);
+                break;
+            case 2:
+                returnString += mTimer2Data;
+
+                if (mTimer2State) {
+                    returnString += "53";
+
+                    int seconds = mTimer2hour*3600 + mTimer2min*60;
+                    String secondString = Integer.toHexString(seconds).toUpperCase();
+
+                    for (int i = 0; i < 4 - secondString.length(); i++) {
+                        returnString += "0";
+                    }
+                    returnString += secondString;
+                } else {
+                    returnString += "43";
+                    returnString += "0000";
+                }
+
+                returnString += calcChecksum(returnString);
+                sendData(returnString);
+                break;
+        }
+    }
+
     public void sendData(String data) {
         if (mDevice != null) {
-            //byte[] value = data.getBytes();
             byte[] value = hexToBytes(data);
             mService.writeRXCharacteristic(value);
         }
     }
 
-    private static IntentFilter makeGattUpdateIntentFilter() {
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(UartService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(UartService.ACTION_GATT_DISCONNECTED);
-        intentFilter.addAction(UartService.ACTION_GATT_SERVICES_DISCOVERED);
-        intentFilter.addAction(UartService.ACTION_DATA_AVAILABLE);
-        intentFilter.addAction(UartService.DEVICE_DOES_NOT_SUPPORT_UART);
-        return intentFilter;
+    private String getStringFromByte(int index) {
+        String myString = "";
+        myString += mFeatherData.charAt(index*2);
+        myString += mFeatherData.charAt(index*2+1);
+        return myString;
     }
 
     public static String bytesToHex(byte[] bytes) {
@@ -456,7 +685,6 @@ public class MainActivity extends AppCompatActivity {
             hexChars[i*2] = hexArray[value >>> 4];
             hexChars[i*2+1] = hexArray[value & 0X0F];
         }
-        //String newString = new String(hexChars);
 
         return new String(hexChars);
     }
@@ -471,64 +699,24 @@ public class MainActivity extends AppCompatActivity {
         return data;
     }
 
-    public void outletButton (View view) {
-        toggleButton(1);
-        if (mState == UART_PROFILE_CONNECTED) {
-            switch (view.getId()) {
-                case R.id.outlet1:
-                    /*if (mOutlet1State) {
-                        mOutlet1State = false;
-                    } else {
-                        mOutlet1State = true;
-                    }*/
+    private String calcChecksum(String data) {
+        StringBuilder returnString = new StringBuilder();
+        int val = 0;
 
-                    //do stuff
-                    //toggleButton(1);
-                    sendData(mPowerLData);
-                    break;
-
-                case R.id.outlet2:
-                    /*if (mOutlet2State) {
-                        mOutlet2State = false;
-                    } else {
-                        mOutlet2State = true;
-                    }*/
-
-                    //do stuff
-                    //toggleButton(2);
-                    sendData(mPowerRData);
-                    break;
-            }
+        for (int i = 0; i < 7; i++) {
+            String temp = "";
+            temp += data.charAt(i*2);
+            temp += data.charAt(i*2+1);
+            val += Integer.parseInt(temp,16);
         }
-    }
+        int comp = ~val;
 
-    public void toggleButton(int value) {
-        if (value == 1) {
-            if (mOutlet1State) {
-                mOutlet1.setBackgroundResource(R.drawable.outlet_button_on);
-                mO1Status.setText(R.string.on);
-                mO1Status.setTextColor(getResources().getColor(R.color.green));
-            } else {
-                mOutlet1.setBackgroundResource(R.drawable.outlet_button_off);
-                mO1Status.setText(R.string.off);
-                mO1Status.setTextColor(getResources().getColor(R.color.red));
-            }
+        String compString = Integer.toHexString(comp & 0xFF).toUpperCase();
 
-        } else {
-            if (mOutlet2State) {
-                mOutlet2.setBackgroundResource(R.drawable.outlet_button_on);
-                mO2Status.setText(R.string.on);
-                mO2Status.setTextColor(getResources().getColor(R.color.green));
-            } else {
-                mOutlet2.setBackgroundResource(R.drawable.outlet_button_off);
-                mO2Status.setText(R.string.off);
-                mO2Status.setTextColor(getResources().getColor(R.color.red));
-            }
+        for (int i = 0; i < 2 - compString.length(); i++) {
+            returnString.append("0");
         }
-    }
-
-    public void timerSet(View view) {
-        TimePickerFragment newFragment = TimePickerFragment.newInstance();
-        newFragment.show(getSupportFragmentManager(),"TimePicker");
+        returnString.append(compString);
+        return returnString.toString();
     }
 }

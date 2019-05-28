@@ -2,27 +2,16 @@
     <string name="app_name">Bluetooth Switch</string>
     <string name="device_name">Device:</string>
     <string name="device_status">Status:</string>
-    <string name="device_name_label">Disconnected</string>
-    <string name="device_status_label">Disconnected</string>
     <string name="cancel">Cancel</string>
 
     <string name="ble_not_supported">BLE is not supported</string>
-    <string name="label_data">Data:</string>
-    <string name="label_device_address">Device address:</string>
-    <string name="label_state">State:</string>
-    <string name="no_data">No data</string>
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>
-    <string name="device_list">Scanning for Bluetooth LE Devices</string>
     <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
 
     <string name="unknown_device">Unknown device</string>
-    <string name="unknown_characteristic">Unknown characteristic</string>
-    <string name="unknown_service">Unknown service</string>
 
     <!-- Menu items -->
-    <string name="menu_connect">Connect</string>
-    <string name="menu_disconnect">Disconnect</string>
     <string name="menu_scan">Scan</string>
     <string name="menu_stop">Stop</string>
     <string name="current_label">Current:</string>
@@ -33,7 +22,7 @@
     <string name="off">Off</string>
     <string name="yes">Yes</string>
     <string name="timer_enable">Timer On</string>
-    <string name="power_off_delay_time">Choose time before outlet power off</string>
+    <string name="power_off_delay_time">Choose time before outlet shutoff</string>
     <string name="set">Set</string>
     <string name="left_outlet">Left Outlet</string>
     <string name="right_outlet">Right Outlet</string>
@@ -41,4 +30,7 @@
     <string name="select_device">Select a Bluetooth Device</string>
     <string name="tap_to_select">Tap to select a device</string>
     <string name="arrow">Arrow</string>
+    <string name="hour">Hour</string>
+    <string name="min">Min</string>
+    <string name="data_send_error">Error sending data</string>
 </resources>

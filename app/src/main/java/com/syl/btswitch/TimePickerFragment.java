@@ -1,20 +1,34 @@
 package com.syl.btswitch;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.EditText;
-import android.widget.TimePicker;
-
-import java.util.Calendar;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.NumberPicker;
+import android.widget.TextView;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 public class TimePickerFragment extends DialogFragment {
-    //private EditText mEditText;
-    private TimePicker mTimePicker;
+    private TextView mTitle;
+    private NumberPicker mHourPicker;
+    private NumberPicker mMinPicker;
+    private View mHide;
+    private CheckBox mCheck;
+
+    private boolean mTimerEnable;
+    private int mHour;
+    private int mMin;
+    private int mIndex;
+
+    private Button mCancel;
+    private Button mSave;
 
     public TimePickerFragment() {
         // Empty constructor is required for DialogFragment
@@ -22,11 +36,14 @@ public class TimePickerFragment extends DialogFragment {
         // Use `newInstance` instead as shown below
     }
 
-    public static TimePickerFragment newInstance() {
+    public static TimePickerFragment newInstance(boolean timerEnable, int hours, int min, int index) {
         TimePickerFragment frag = new TimePickerFragment();
-        /*Bundle args = new Bundle();
-        args.putString("title", title);
-        frag.setArguments(args);*/
+        Bundle args = new Bundle();
+        args.putBoolean("timerEnable", timerEnable);
+        args.putInt("hours", hours);
+        args.putInt("min", min);
+        args.putInt("index", index);
+        frag.setArguments(args);
         return frag;
     }
 
@@ -40,15 +57,100 @@ public class TimePickerFragment extends DialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mTimePicker = view.findViewById(R.id.timePicker);
-        mTimePicker.setIs24HourView(true);
+        mTitle = view.findViewById(R.id.timePickerTitle);
+        mHourPicker = view.findViewById(R.id.hourPicker);
+        mMinPicker = view.findViewById(R.id.minPicker);
+        mHide = view.findViewById(R.id.pickerDisable);
 
-        // Get field from view
-        //mEditText = (EditText) view.findViewById(R.id.txt_your_name);
-        // Fetch arguments from bundle and set title
-        /*String title = getArguments().getString("title", "Enter Name");
-        getDialog().setTitle(title);
-        getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);*/
+        mTimerEnable = getArguments().getBoolean("timerEnable");
+        mHour = getArguments().getInt("hours");
+        mMin = getArguments().getInt("min");
+        mIndex = getArguments().getInt("index");
+        if (mIndex == 1) {
+            mTitle.setText(R.string.left_outlet);
+        } else {
+            mTitle.setText(R.string.right_outlet);
+        }
+
+        mHourPicker.setMinValue(0);
+        mHourPicker.setMaxValue(9);
+        mMinPicker.setMinValue(0);
+        mMinPicker.setMaxValue(59);
+
+        mHourPicker.setValue(mHour);
+        mMinPicker.setValue(mMin);
+
+        mSave = view.findViewById(R.id.setTimer);
+        mSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeTimer(1);
+            }
+        });
+        mCancel = view.findViewById(R.id.cancelTimer);
+        mCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeTimer(2);
+            }
+        });
+
+        mCheck = view.findViewById(R.id.timePickerCheckbox);
+        mCheck.setChecked(mTimerEnable);
+        if (mTimerEnable) {
+            mHide.setVisibility(GONE);
+            mHourPicker.setEnabled(true);
+            mMinPicker.setEnabled(true);
+        } else {
+            mHide.setVisibility(VISIBLE);
+            mHourPicker.setEnabled(false);
+            mMinPicker.setEnabled(false);
+        }
+
+        mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mTimerEnable = true;
+                    mHide.setVisibility(GONE);
+                    mHourPicker.setEnabled(true);
+                    mMinPicker.setEnabled(true);
+                } else {
+                    mTimerEnable = false;
+                    mHide.setVisibility(VISIBLE);
+                    mHourPicker.setEnabled(false);
+                    mMinPicker.setEnabled(false);
+                }
+            }
+        });
     }
 
+    public void closeTimer (int index) {
+        if (index == 1) {
+            mHour = mHourPicker.getValue();
+            mMin = mMinPicker.getValue();
+            mListener.returnData(mTimerEnable, mHour, mMin, mIndex);
+        }
+        this.dismiss();
+    }
+
+    public interface OnCompleteListener {
+        void returnData(boolean enable, int hour, int min, int index);
+    }
+
+    private OnCompleteListener mListener;
+
+    // make sure the Activity implemented it
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        // Verify that the host activity implements the callback interface
+        try {
+            // Instantiate the EditNameDialogListener so we can send events to the host
+            mListener = (OnCompleteListener) context;
+        } catch (ClassCastException e) {
+            // The activity doesn't implement the interface, throw exception
+            throw new ClassCastException(context.toString() + " must implement EditNameDialogListener");
+        }
+    }
 }

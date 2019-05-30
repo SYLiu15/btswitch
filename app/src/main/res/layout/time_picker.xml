@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="270dp"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
     android:minWidth="270dp"
     android:padding="12dp">
 
@@ -81,40 +79,17 @@
         app:layout_constraintStart_toEndOf="@+id/hour"
         app:layout_constraintTop_toTopOf="@+id/hour" />
 
-    <CheckBox
-        android:id="@+id/timePickerCheckbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        app:layout_constraintEnd_toStartOf="@+id/timerEnable"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/hourPicker" />
-
-    <TextView
-        android:id="@+id/timerEnable"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:gravity="start|center_vertical"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:text="@string/timer_enable"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/timePickerCheckbox"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/timePickerCheckbox"
-        app:layout_constraintTop_toTopOf="@+id/timePickerCheckbox"
-        app:layout_constraintVertical_bias="0.0" />
-
     <Button
         android:id="@+id/cancelTimer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:text="@string/cancel"
         app:layout_constraintEnd_toStartOf="@+id/setTimer"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHorizontal_chainStyle="spread"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timerEnable" />
+        app:layout_constraintTop_toBottomOf="@+id/hourPicker" />
 
     <Button
         android:id="@+id/setTimer"
@@ -126,16 +101,5 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/cancelTimer"
         app:layout_constraintTop_toTopOf="@+id/cancelTimer" />
-
-    <View
-        android:id="@+id/pickerDisable"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:alpha="0.7"
-        android:background="@color/colorBackground"
-        app:layout_constraintBottom_toTopOf="@+id/timerEnable"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timePickerTitle" />
 
 </android.support.constraint.ConstraintLayout>

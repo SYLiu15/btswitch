@@ -41,12 +41,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 
 /**
  * Activity for scanning and displaying available Bluetooth LE devices.
@@ -56,6 +61,9 @@ public class DeviceScanActivity extends ListActivity {
     private BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning;
     private Handler mHandler;
+
+    private Button mScan;
+    private Button mStop;
 
     private static final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
@@ -67,6 +75,9 @@ public class DeviceScanActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bt_popup);
         mHandler = new Handler();
+
+        mScan = findViewById(R.id.btscan);
+        mStop = findViewById(R.id.btstop);
 
         // Use this check to determine whether BLE is supported on the device.  Then you can
         // selectively disable BLE-related features.
@@ -150,10 +161,20 @@ public class DeviceScanActivity extends ListActivity {
         final BluetoothLeScanner mBluetoothScanner = mBluetoothAdapter.getBluetoothLeScanner();
 
         if (enable) {
+            mScan.setVisibility(GONE);
+            mScan.setClickable(false);
+            mStop.setVisibility(VISIBLE);
+            mStop.setClickable(true);
+
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    mStop.setVisibility(GONE);
+                    mStop.setClickable(false);
+                    mScan.setVisibility(VISIBLE);
+                    mScan.setClickable(true);
+
                     mScanning = false;
                     mBluetoothScanner.stopScan(mLeScanCallback);
                 }
@@ -162,6 +183,11 @@ public class DeviceScanActivity extends ListActivity {
             mScanning = true;
             mBluetoothScanner.startScan(mLeScanCallback);
         } else {
+            mStop.setVisibility(GONE);
+            mStop.setClickable(false);
+            mScan.setVisibility(VISIBLE);
+            mScan.setClickable(true);
+
             mScanning = false;
             mBluetoothScanner.stopScan(mLeScanCallback);
         }
@@ -214,8 +240,7 @@ public class DeviceScanActivity extends ListActivity {
             if (view == null) {
                 view = mInflator.inflate(R.layout.listitem_device, null);
                 viewHolder = new ViewHolder();
-                viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
-                viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
+                viewHolder.deviceName = view.findViewById(R.id.device_name);
                 view.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
@@ -227,7 +252,6 @@ public class DeviceScanActivity extends ListActivity {
                 viewHolder.deviceName.setText(deviceName);
             else
                 viewHolder.deviceName.setText(R.string.unknown_device);
-            viewHolder.deviceAddress.setText(device.getAddress());
 
             return view;
         }
@@ -261,6 +285,5 @@ public class DeviceScanActivity extends ListActivity {
 
     static class ViewHolder {
         TextView deviceName;
-        TextView deviceAddress;
     }
 }

@@ -91,12 +91,17 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
     //status values
     private boolean mOutlet1State = false;
     private boolean mOutlet2State = false;
+    private boolean mO1Verified = true;
+    private int mO1Count = 0;
+    private boolean mO2Verified = true;
+    private int mO2Count = 0;
+
     private boolean mTimer1State = false;
     private int mTimer1hour = 1;
-    private int mTimer1min = 2;
+    private int mTimer1min = 0;
     private boolean mTimer2State = false;
-    private int mTimer2hour = 3;
-    private int mTimer2min = 4;
+    private int mTimer2hour = 1;
+    private int mTimer2min = 0;
 
     //UI elements
     private Group mHideGroup;
@@ -107,8 +112,6 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
     private TextView mTimer1;
     private TextView mTimer2;
     private ImageView mStatusIndicator;
-
-    //private TextView mTest;
 
     private Button mOutlet1;
     private Button mOutlet2;
@@ -288,12 +291,6 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
         return intentFilter;
     }
 
-    public void testButton(View view) {
-        Toast myToast = Toast.makeText(this, String.valueOf(R.string.device_name), Toast.LENGTH_SHORT);
-        myToast.setGravity(Gravity.CENTER,0,0);
-        myToast.show();
-    }
-
     public void showBtMenu(View view) {
         if (mDeviceName != null) {
             AlertDialog.Builder aDialog = new AlertDialog.Builder(this);
@@ -404,13 +401,12 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
             mData1 = null;
 
             //packet check
-            if (getStringFromByte(0).equals("21") && getStringFromByte(1).equals("53")) {
+            if (getStringFromByte(0).equals("21") && getStringFromByte(1).equals("53") && mFeatherData.length() == 42) {
                 //overcurrent check
                 if (getStringFromByte(18).equals("01")) {
                     AlertDialog.Builder aDialog = new AlertDialog.Builder(this);
                     aDialog.setTitle("Over-current Warning!");
-                    String myString = "Device experienced current draw exceeding safe values. Resetting outlets.";
-                    aDialog.setMessage(myString);
+                    aDialog.setMessage(R.string.overcurrent_warning);
                     aDialog.show();
                     return;
                 }
@@ -419,19 +415,47 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
                 //left on/off
                 if (getStringFromByte(3).equals("01") && !mOutlet1State) {
                     mOutlet1State = true;
+                    mO1Verified = true;
+                    mO1Count = 0;
                     toggleButton(1);
                 } else if (getStringFromByte(3).equals("00") && mOutlet1State) {
                     mOutlet1State = false;
+                    mO1Verified = true;
+                    mO1Count = 0;
                     toggleButton(1);
+                } else if (mO1Count >= 2) {
+                    mO1Verified = true;
+                    mO1Count = 0;
+                    toggleButton(1);
+
+                    Toast myToast = Toast.makeText(this, "Error sending data for Left Outlet", Toast.LENGTH_SHORT);
+                    myToast.setGravity(Gravity.CENTER,0,0);
+                    myToast.show();
+                } else if (!mO1Verified) {
+                    mO1Count++;
                 }
 
                 //right on/off
                 if (getStringFromByte(11).equals("01") && !mOutlet2State) {
                     mOutlet2State = true;
+                    mO2Verified = true;
+                    mO2Count = 0;
                     toggleButton(2);
                 } else if (getStringFromByte(11).equals("00") && mOutlet2State) {
                     mOutlet2State = false;
+                    mO2Verified = true;
+                    mO2Count = 0;
                     toggleButton(2);
+                } else if (mO2Count >= 2) {
+                    mO2Verified = true;
+                    mO2Count = 0;
+                    toggleButton(2);
+
+                    Toast myToast = Toast.makeText(this, "Error sending data for Right Outlet", Toast.LENGTH_SHORT);
+                    myToast.setGravity(Gravity.CENTER,0,0);
+                    myToast.show();
+                } else if (!mO2Verified) {
+                    mO2Count++;
                 }
 
                 //update timers
@@ -514,7 +538,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
         String returnString = "";
         int hourRem = seconds/3600;
         int minRem = (seconds%3600)/60;
-        int secRem = ((seconds%3600)%60);
+        int secRem = (seconds%3600)%60;
         if (hourRem != 0) {
             returnString += hourRem;
             returnString += "h ";
@@ -533,10 +557,16 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
         if (mState == UART_PROFILE_CONNECTED) {
             switch (view.getId()) {
                 case R.id.outlet1:
+                    mO1Status.setText(R.string.switching);
+                    mO1Status.setTextColor(ContextCompat.getColor(this, R.color.colorText));
+                    mO1Verified = false;
                     sendData(mPowerLData);
                     break;
 
                 case R.id.outlet2:
+                    mO2Status.setText(R.string.switching);
+                    mO2Status.setTextColor(ContextCompat.getColor(this, R.color.colorText));
+                    mO2Verified = false;
                     sendData(mPowerRData);
                     break;
             }
@@ -577,88 +607,140 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
             TimePickerFragment newFragment;
             switch (view.getId()) {
                 case R.id.o1TimerSet:
-                    newFragment = TimePickerFragment.newInstance(mTimer1State, mTimer1hour, mTimer1min, 1);
-                    newFragment.show(getSupportFragmentManager(),"TimePicker");
+                    if (mTimer1State) {
+                        //prompt for cancel or change time
+                        AlertDialog.Builder aDialog = new AlertDialog.Builder(this);
+                        aDialog.setTitle("Left Outlet Timer");
+                        aDialog.setMessage("Disable timer or set a new timer?");
+
+                        aDialog.setPositiveButton(R.string.set_timer, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                TimePickerFragment newFragment = TimePickerFragment.newInstance(mTimer1hour, mTimer1min, 1);
+                                newFragment.show(getSupportFragmentManager(),"TimePicker");
+                            }
+                        });
+
+                        aDialog.setNegativeButton(R.string.disable_timer, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                sendTimeData(1,false);
+                            }
+                        });
+
+                        aDialog.setNeutralButton(R.string.cancel,null);
+
+                        aDialog.show();
+                    } else {
+                        newFragment = TimePickerFragment.newInstance(mTimer1hour, mTimer1min,1);
+                        newFragment.show(getSupportFragmentManager(),"TimePicker");
+                    }
                     break;
 
                 case R.id.o2TimerSet:
-                    newFragment = TimePickerFragment.newInstance(mTimer2State, mTimer2hour, mTimer2min, 2);
-                    newFragment.show(getSupportFragmentManager(),"TimePicker");
+                    if (mTimer2State) {
+                        //prompt for cancel or change time
+                        AlertDialog.Builder aDialog = new AlertDialog.Builder(this);
+                        aDialog.setTitle("Right Outlet Timer");
+                        aDialog.setMessage("Disable timer or set a new timer?");
+
+                        aDialog.setPositiveButton(R.string.set_timer, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                TimePickerFragment newFragment = TimePickerFragment.newInstance(mTimer2hour, mTimer2min,2);
+                                newFragment.show(getSupportFragmentManager(),"TimePicker");
+                            }
+                        });
+
+                        aDialog.setNegativeButton(R.string.disable_timer, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                sendTimeData(2,false);
+                            }
+                        });
+
+                        aDialog.setNeutralButton(R.string.cancel,null);
+
+                        aDialog.show();
+                    } else {
+                        newFragment = TimePickerFragment.newInstance(mTimer2hour, mTimer2min, 2);
+                        newFragment.show(getSupportFragmentManager(),"TimePicker");
+                    }
                     break;
             }
         } else {
-            //device error toast
+            Toast myToast = Toast.makeText(this, String.valueOf(R.string.data_send_error), Toast.LENGTH_SHORT);
+            myToast.setGravity(Gravity.CENTER,0,0);
+            myToast.show();
         }
 
     }
 
     @Override
-    public void returnData(boolean enable, int hour, int min, int index) {
+    public void returnData(int hour, int min, int index) {
         // Use the returned value
         switch (index) {
             case 1:
-                mTimer1State = enable;
                 mTimer1hour = hour;
                 mTimer1min = min;
 
                 //send data
-                sendTimeData(1);
+                sendTimeData(1,true);
                 break;
             case 2:
-                mTimer2State = enable;
                 mTimer2hour = hour;
                 mTimer2min = min;
 
                 //send data
-                sendTimeData(2);
+                sendTimeData(2,true);
                 break;
         }
     }
 
-    private void sendTimeData(int index) {
-        String returnString = "";
+    private void sendTimeData(int index, boolean enable) {
+        StringBuilder returnString = new StringBuilder();
         switch (index) {
             case 1:
-                returnString += mTimer1Data;
+                returnString.append(mTimer1Data);
 
-                if (mTimer1State) {
-                    returnString += "53";
+                if (enable) {
+                    returnString.append("53");
 
                     int seconds = mTimer1hour*3600 + mTimer1min*60;
                     String secondString = Integer.toHexString(seconds).toUpperCase();
 
                     for (int i = 0; i < 4 - secondString.length(); i++) {
-                        returnString += "0";
+                        returnString.append("0");
                     }
-                    returnString += secondString;
+                    returnString.append(secondString);
                 } else {
-                    returnString += "43";
-                    returnString += "0000";
+                    returnString.append("43");
+                    returnString.append("0000");
                 }
 
-                returnString += calcChecksum(returnString);
-                sendData(returnString);
+                returnString.append(calcChecksum(returnString.toString()));
+                sendData(returnString.toString());
                 break;
             case 2:
-                returnString += mTimer2Data;
+                returnString.append(mTimer2Data);
 
-                if (mTimer2State) {
-                    returnString += "53";
+                if (enable) {
+                    returnString.append("53");
 
                     int seconds = mTimer2hour*3600 + mTimer2min*60;
                     String secondString = Integer.toHexString(seconds).toUpperCase();
 
                     for (int i = 0; i < 4 - secondString.length(); i++) {
-                        returnString += "0";
+                        returnString.append("0");
                     }
-                    returnString += secondString;
+                    returnString.append(secondString);
                 } else {
-                    returnString += "43";
-                    returnString += "0000";
+                    returnString.append("43");
+                    returnString.append("0000");
                 }
 
-                returnString += calcChecksum(returnString);
-                sendData(returnString);
+                returnString.append(calcChecksum(returnString.toString()));
+                sendData(returnString.toString());
                 break;
         }
     }

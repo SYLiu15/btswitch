@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Bluetooth Switch</string>
+    <string name="app_name">BT Switch</string>
     <string name="device_name">Device:</string>
     <string name="device_status">Status:</string>
     <string name="cancel">Cancel</string>
@@ -21,7 +21,6 @@
     <string name="disabled">Disabled</string>
     <string name="off">Off</string>
     <string name="yes">Yes</string>
-    <string name="timer_enable">Timer On</string>
     <string name="power_off_delay_time">Choose time before outlet shutoff</string>
     <string name="set">Set</string>
     <string name="left_outlet">Left Outlet</string>
@@ -32,5 +31,10 @@
     <string name="arrow">Arrow</string>
     <string name="hour">Hour</string>
     <string name="min">Min</string>
-    <string name="data_send_error">Error sending data</string>
+    <string name="data_send_error">Error sending data. Device not connected.</string>
+    <string name="overcurrent_warning">Device experienced current draw exceeding safe values. Resetting outlets.</string>
+    <string name="switching">Switching…</string>
+    <string name="set_timer">Set Timer</string>
+    <string name="disable_timer">Disable Timer</string>
+    <string name="app_name_full">Bluetooth Switch</string>
 </resources>

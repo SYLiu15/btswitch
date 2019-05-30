@@ -8,21 +8,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.NumberPicker;
 import android.widget.TextView;
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 
 public class TimePickerFragment extends DialogFragment {
     private TextView mTitle;
     private NumberPicker mHourPicker;
     private NumberPicker mMinPicker;
-    private View mHide;
-    private CheckBox mCheck;
 
-    private boolean mTimerEnable;
     private int mHour;
     private int mMin;
     private int mIndex;
@@ -36,10 +29,9 @@ public class TimePickerFragment extends DialogFragment {
         // Use `newInstance` instead as shown below
     }
 
-    public static TimePickerFragment newInstance(boolean timerEnable, int hours, int min, int index) {
+    public static TimePickerFragment newInstance(int hours, int min, int index) {
         TimePickerFragment frag = new TimePickerFragment();
         Bundle args = new Bundle();
-        args.putBoolean("timerEnable", timerEnable);
         args.putInt("hours", hours);
         args.putInt("min", min);
         args.putInt("index", index);
@@ -60,9 +52,7 @@ public class TimePickerFragment extends DialogFragment {
         mTitle = view.findViewById(R.id.timePickerTitle);
         mHourPicker = view.findViewById(R.id.hourPicker);
         mMinPicker = view.findViewById(R.id.minPicker);
-        mHide = view.findViewById(R.id.pickerDisable);
 
-        mTimerEnable = getArguments().getBoolean("timerEnable");
         mHour = getArguments().getInt("hours");
         mMin = getArguments().getInt("min");
         mIndex = getArguments().getInt("index");
@@ -94,48 +84,19 @@ public class TimePickerFragment extends DialogFragment {
                 closeTimer(2);
             }
         });
-
-        mCheck = view.findViewById(R.id.timePickerCheckbox);
-        mCheck.setChecked(mTimerEnable);
-        if (mTimerEnable) {
-            mHide.setVisibility(GONE);
-            mHourPicker.setEnabled(true);
-            mMinPicker.setEnabled(true);
-        } else {
-            mHide.setVisibility(VISIBLE);
-            mHourPicker.setEnabled(false);
-            mMinPicker.setEnabled(false);
-        }
-
-        mCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    mTimerEnable = true;
-                    mHide.setVisibility(GONE);
-                    mHourPicker.setEnabled(true);
-                    mMinPicker.setEnabled(true);
-                } else {
-                    mTimerEnable = false;
-                    mHide.setVisibility(VISIBLE);
-                    mHourPicker.setEnabled(false);
-                    mMinPicker.setEnabled(false);
-                }
-            }
-        });
     }
 
     public void closeTimer (int index) {
         if (index == 1) {
             mHour = mHourPicker.getValue();
             mMin = mMinPicker.getValue();
-            mListener.returnData(mTimerEnable, mHour, mMin, mIndex);
+            mListener.returnData(mHour, mMin, mIndex);
         }
         this.dismiss();
     }
 
     public interface OnCompleteListener {
-        void returnData(boolean enable, int hour, int min, int index);
+        void returnData(int hour, int min, int index);
     }
 
     private OnCompleteListener mListener;

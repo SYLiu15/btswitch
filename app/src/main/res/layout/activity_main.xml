@@ -9,15 +9,15 @@
     <!-- 1st button info -->
     <Button
         android:id="@+id/outlet1"
-        android:layout_width="130dp"
-        android:layout_height="130dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:layout_marginStart="60dp"
         android:layout_marginTop="30dp"
         android:background="@drawable/outlet_button_off"
         android:onClick="outletButton"
+        android:stateListAnimator="@null"
         android:textSize="30sp"
         android:textStyle="bold"
-        android:stateListAnimator="@null"
         app:layout_constraintEnd_toStartOf="@+id/o1Label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btBackground" />
@@ -149,15 +149,15 @@
     <!-- 2nd button info -->
     <Button
         android:id="@+id/outlet2"
-        android:layout_width="130dp"
-        android:layout_height="130dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:layout_marginStart="60dp"
         android:layout_marginTop="30dp"
         android:background="@drawable/outlet_button_off"
         android:onClick="outletButton"
+        android:stateListAnimator="@null"
         android:textSize="30sp"
         android:textStyle="bold"
-        android:stateListAnimator="@null"
         app:layout_constraintEnd_toStartOf="@+id/o2Label"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/o1Timer" />

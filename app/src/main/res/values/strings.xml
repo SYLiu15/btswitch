@@ -14,7 +14,7 @@
     <!-- Menu items -->
     <string name="menu_scan">Scan</string>
     <string name="menu_stop">Stop</string>
-    <string name="current_label">Current:</string>
+    <string name="current_label">Power:</string>
     <string name="timer_label">Timer:</string>
     <string name="settings">Settings</string>
     <string name="status_indicator">Status</string>
@@ -35,6 +35,8 @@
     <string name="overcurrent_warning">Device experienced current draw exceeding safe values. Resetting outlets.</string>
     <string name="switching">Switching…</string>
     <string name="set_timer">Set Timer</string>
-    <string name="disable_timer">Disable Timer</string>
+    <string name="disable_timer">Cancel Timer</string>
     <string name="app_name_full">Bluetooth Switch</string>
+    <string name="ok">Ok</string>
+    <string name="back">Back</string>
 </resources>

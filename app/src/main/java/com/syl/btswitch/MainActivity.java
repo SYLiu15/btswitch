@@ -235,12 +235,14 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
     protected void onStop() {
         Log.d(TAG, "onStop");
         super.onStop();
+        disconnectDevice();
     }
 
     @Override
     protected void onPause() {
         Log.d(TAG, "onPause");
         super.onPause();
+        disconnectDevice();
     }
 
     @Override
@@ -303,18 +305,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
             aDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    mService.disconnect();
-                    mDeviceName = null;
-                    mState = UART_PROFILE_DISCONNECTED;
-
-                    mOutlet1State = false;
-                    mOutlet2State = false;
-                    mTimer1State = false;
-                    mTimer2State = false;
-                    toggleButton(1);
-                    toggleButton(2);
-                    displayData();
-                    updateDeviceText();
+                    disconnectDevice();
                 }
             });
 
@@ -326,6 +317,21 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
             startActivityForResult(myIntent, REQUEST_SELECT_DEVICE);
             updateDeviceText();
         }
+    }
+
+    void disconnectDevice() {
+        mService.disconnect();
+        mDeviceName = null;
+        mState = UART_PROFILE_DISCONNECTED;
+
+        mOutlet1State = false;
+        mOutlet2State = false;
+        mTimer1State = false;
+        mTimer2State = false;
+        toggleButton(1);
+        toggleButton(2);
+        displayData();
+        updateDeviceText();
     }
 
     @Override
@@ -407,6 +413,8 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
                     AlertDialog.Builder aDialog = new AlertDialog.Builder(this);
                     aDialog.setTitle("Over-current Warning!");
                     aDialog.setMessage(R.string.overcurrent_warning);
+
+                    aDialog.setPositiveButton(R.string.ok,null);
                     aDialog.show();
                     return;
                 }
@@ -423,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
                     mO1Verified = true;
                     mO1Count = 0;
                     toggleButton(1);
-                } else if (mO1Count >= 2) {
+                } else if (mO1Count >= 1) {
                     mO1Verified = true;
                     mO1Count = 0;
                     toggleButton(1);
@@ -446,7 +454,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
                     mO2Verified = true;
                     mO2Count = 0;
                     toggleButton(2);
-                } else if (mO2Count >= 2) {
+                } else if (mO2Count >= 1) {
                     mO2Verified = true;
                     mO2Count = 0;
                     toggleButton(2);
@@ -521,9 +529,9 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
         myString += mFeatherData.charAt(index*2+3);
 
         int myInt = Integer.parseInt(myString,16);
-        float someFloat = (float)myInt/1000;
+        float someFloat = ((float)myInt/1000)*120;
         String returnString = Float.toString(someFloat);
-        returnString += " A";
+        returnString += " W";
         return returnString;
     }
 
@@ -611,7 +619,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
                         //prompt for cancel or change time
                         AlertDialog.Builder aDialog = new AlertDialog.Builder(this);
                         aDialog.setTitle("Left Outlet Timer");
-                        aDialog.setMessage("Disable timer or set a new timer?");
+                        aDialog.setMessage("Cancel timer or set a new timer?");
 
                         aDialog.setPositiveButton(R.string.set_timer, new DialogInterface.OnClickListener() {
                             @Override
@@ -628,7 +636,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
                             }
                         });
 
-                        aDialog.setNeutralButton(R.string.cancel,null);
+                        aDialog.setNeutralButton(R.string.back,null);
 
                         aDialog.show();
                     } else {
@@ -642,7 +650,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
                         //prompt for cancel or change time
                         AlertDialog.Builder aDialog = new AlertDialog.Builder(this);
                         aDialog.setTitle("Right Outlet Timer");
-                        aDialog.setMessage("Disable timer or set a new timer?");
+                        aDialog.setMessage("Cancel timer or set a new timer?");
 
                         aDialog.setPositiveButton(R.string.set_timer, new DialogInterface.OnClickListener() {
                             @Override
@@ -659,7 +667,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerFragmen
                             }
                         });
 
-                        aDialog.setNeutralButton(R.string.cancel,null);
+                        aDialog.setNeutralButton(R.string.back,null);
 
                         aDialog.show();
                     } else {
